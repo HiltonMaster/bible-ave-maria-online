@@ -157,10 +157,16 @@
     .nav-buttons {
       text-align: center;
       margin: 1.5em 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
     }
 
     .nav-buttons button {
-      margin: 0 10px;
+      margin: 0;
+      flex: 1 1 120px;
+      max-width: 160px;
     }
 
     .favorites-list {
