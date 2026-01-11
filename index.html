@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/jpeg" href="images/bible_icon.jpg">
+  <link rel="shortcut icon" href="images/bible_icon.jpg" type="image/jpeg">
+  <link rel="apple-touch-icon" href="images/bible_icon.jpg">
+  
+  <title>Bíblia Ave Maria</title>
+  
+  <style>
+    :root {
+      --bg: #f8f5ef;
+      --text: #2c1810;
+      --card: white;
+      --card-bg: #fffef7;
+      --border: #e8d9c1;
+      --accent: #8b5a2b;
+      --accent-dark: #6d4621;
+      --title: #5c2d0f;
+    }
+
+    body.dark {
+      --bg: #1a1410;
+      --text: #e8d9c1;
+      --card: #2c1e16;
+      --card-bg: #35291f;
+      --border: #4a3a2c;
+      --accent: #c9a47e;
+      --accent-dark: #a8835e;
+      --title: #e8c39e;
+    }
+
+    /* Fonte personalizada Outfit-Regular */
+    @font-face {
+      font-family: 'Outfit-Regular';
+      src: url('fonts/Outfit-Regular.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+      transition: background 0.4s, color 0.4s;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--card);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .header {
+      position: relative;
+      text-align: center;
+      margin-bottom: 1.2em;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--title);
+      font-family: 'Outfit-Regular', cursive, sans-serif;
+      font-size: 2.8rem;
+      letter-spacing: 1px;
+    }
+
+    #toggleDark {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.6rem;
+      padding: 8px 12px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--accent);
+    }
+
+    #toggleDark:hover {
+      color: var(--accent-dark);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 1.5em;
+      justify-content: center;
+      align-items: center;
+    }
+
+    select, input, button {
+      padding: 10px 16px;
+      font-size: 1.05rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+    }
+
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover { background: var(--accent-dark); }
+
+    #searchInput { width: 220px; }
+
+    #conteudo {
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      min-height: 400px;
+    }
+
+    .versiculo {
+      margin: 1.2em 0;
+      text-indent: 2em;
+    }
+
+    .versiculo-num {
+      font-weight: bold;
+      color: var(--accent);
+      margin-right: 0.7em;
+    }
+
+    .highlight {
+      background-color: #fff176;
+      color: #000;
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+
+    .titulo {
+      text-align: center;
+      color: var(--title);
+      margin: 0.8em 0 1.5em;
+    }
+
+    .nav-buttons {
+      text-align: center;
+      margin: 1.5em 0;
+    }
+
+    .nav-buttons button {
+      margin: 0 10px;
+    }
+
+    .favorites-list {
+      margin-top: 1.5em;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .fav-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .fav-item:last-child { border-bottom: none; }
+
+    optgroup {
+      font-weight: bold;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Bíblia Ave Maria</h1>
+    <button id="toggleDark" title="Alternar modo noturno">🌙</button>
+  </div>
+
+  <div class="controls">
+    <select id="livroSelect">
+      <option value="">Selecione o livro...</option>
+    </select>
+
+    <select id="capituloSelect" disabled>
+      <option value="">Capítulo...</option>
+    </select>
+
+    <button onclick="carregarCapitulo()">Carregar</button>
+
+    <input type="text" id="searchInput" placeholder="Buscar palavra..." oninput="destacarBusca()">
+  </div>
+
+  <div id="conteudo">
+    <p style="text-align:center; color:#777; margin-top:3em;">
+      Escolha um livro e capítulo acima
+    </p>
+  </div>
+
+  <div class="nav-buttons">
+    <button id="btnAnterior" onclick="navegarCapitulo(-1)" disabled>Anterior</button>
+    <button id="btnProximo" onclick="navegarCapitulo(1)" disabled>Próximo</button>
+    <button id="btnFavoritar" onclick="toggleFavorito()" disabled>Favoritar ★</button>
+  </div>
+
+  <div id="favoritosSection" style="display:none;">
+    <h3 style="margin:1em 0 0.5em;">Favoritos</h3>
+    <div class="favorites-list" id="favoritosList"></div>
+  </div>
+</div>
+
+<script>
+const CAMINHO_JSON = "bibliaAveMariaJSON-main/bibliaAveMaria.json";
+
+let biblia = null;
+let livrosFlat = [];
+let livroAtual = "";
+let capituloAtual = 0;
+
+const toggleDark = document.getElementById("toggleDark");
+const conteudo = document.getElementById("conteudo");
+
+// Carrega preferência de dark mode
+if (localStorage.getItem("darkMode") === "true") {
+  document.body.classList.add("dark");
+  toggleDark.textContent = "☀️";
+}
+
+toggleDark.onclick = () => {
+  document.body.classList.toggle("dark");
+  const isDark = document.body.classList.contains("dark");
+  toggleDark.textContent = isDark ? "☀️" : "🌙";
+  localStorage.setItem("darkMode", isDark);
+};
+
+// Função movida para cima - agora definida antes de ser usada
+function atualizarCapitulos() {
+  const nome = document.getElementById("livroSelect").value;
+  const capSelect = document.getElementById("capituloSelect");
+  capSelect.disabled = true;
+  capSelect.innerHTML = '<option value="">Capítulo...</option>';
+
+  if (!nome) return;
+
+  const livroObj = livrosFlat.find(l => l.nome === nome);
+  if (!livroObj) return;
+
+  const caps = livroObj.capitulos.map(c => c.capitulo).sort((a,b)=>a-b);
+
+  caps.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    capSelect.appendChild(opt);
+  });
+
+  capSelect.disabled = false;
+}
+
+fetch(CAMINHO_JSON)
+  .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+  .then(data => {
+    biblia = data;
+    if (Array.isArray(biblia)) {
+      livrosFlat = biblia;
+    } else if (biblia.antigoTestamento && biblia.novoTestamento) {
+      livrosFlat = [...biblia.antigoTestamento, ...biblia.novoTestamento];
+    } else {
+      throw new Error("Formato JSON não reconhecido");
+    }
+    popularLivros();
+    carregarFavoritos();
+  })
+  .catch(err => {
+    conteudo.innerHTML = `<p style="color:red; text-align:center;">Erro ao carregar Bíblia:<br>${err.message}</p>`;
+    console.error(err);
+  });
+
+function popularLivros() {
+  const select = document.getElementById("livroSelect");
+  select.innerHTML = '<option value="">Selecione o livro...</option>';
+
+  const ordemCanonica = [
+    "Gênesis", "Êxodo", "Levítico", "Números", "Deuteronômio",
+    "Josué", "Juízes", "Rute", "I Samuel", "II Samuel",
+    "I Reis", "II Reis", "I Crônicas", "II Crônicas",
+    "Esdras", "Neemias", "Tobias", "Judite", "Ester",
+    "I Macabeus", "II Macabeus",
+    "Jó", "Salmos", "Provérbios", "Eclesiastes", "Cântico dos Cânticos",
+    "Sabedoria", "Eclesiástico",
+    "Isaías", "Jeremias", "Lamentações", "Baruc", "Ezequiel", "Daniel",
+    "Oséias", "Joel", "Amós", "Abdias", "Jonas", "Miquéias",
+    "Naum", "Habacuc", "Sofonias", "Ageu", "Zacarias", "Malaquias",
+    "São Mateus", "São Marcos", "São Lucas", "São João",
+    "Atos dos Apóstolos",
+    "Romanos", "I Coríntios", "II Coríntios", "Gálatas", "Efésios",
+    "Filipenses", "Colossenses", "I Tessalonicenses", "II Tessalonicenses",
+    "I Timóteo", "II Timóteo", "Tito", "Filêmon",
+    "Hebreus",
+    "São Tiago", "I São Pedro", "II São Pedro",
+    "I São João", "II São João", "III São João", "São Judas",
+    "Apocalipse"
+  ];
+
+  const ntLivros = [
+    "São Mateus", "São Marcos", "São Lucas", "São João",
+    "Atos dos Apóstolos",
+    "Romanos", "I Coríntios", "II Coríntios", "Gálatas", "Efésios",
+    "Filipenses", "Colossenses", "I Tessalonicenses", "II Tessalonicenses",
+    "I Timóteo", "II Timóteo", "Tito", "Filêmon",
+    "Hebreus",
+    "São Tiago", "I São Pedro", "II São Pedro",
+    "I São João", "II São João", "III São João", "São Judas",
+    "Apocalipse"
+  ];
+
+  const antigo = ordemCanonica.filter(nome => !ntLivros.includes(nome));
+  const novo = ordemCanonica.filter(nome => ntLivros.includes(nome));
+
+  if (antigo.length > 0) {
+    const groupAT = document.createElement("optgroup");
+    groupAT.label = "Antigo Testamento";
+    antigo.forEach(nome => {
+      if (livrosFlat.some(l => l.nome === nome)) {
+        const opt = document.createElement("option");
+        opt.value = nome;
+        opt.textContent = nome;
+        groupAT.appendChild(opt);
+      }
+    });
+    select.appendChild(groupAT);
+  }
+
+  if (novo.length > 0) {
+    const groupNT = document.createElement("optgroup");
+    groupNT.label = "Novo Testamento";
+    novo.forEach(nome => {
+      if (livrosFlat.some(l => l.nome === nome)) {
+        const opt = document.createElement("option");
+        opt.value = nome;
+        opt.textContent = nome;
+        groupNT.appendChild(opt);
+      }
+    });
+    select.appendChild(groupNT);
+  }
+
+  select.onchange = atualizarCapitulos;
+}
+
+function carregarCapitulo() {
+  const nome = document.getElementById("livroSelect").value;
+  const cap = Number(document.getElementById("capituloSelect").value);
+
+  if (!nome || isNaN(cap)) return;
+
+  livroAtual = nome;
+  capituloAtual = cap;
+
+  const livroObj = livrosFlat.find(l => l.nome === nome);
+  const capituloObj = livroObj?.capitulos.find(c => c.capitulo === cap);
+
+  if (!capituloObj) {
+    conteudo.innerHTML = '<p style="color:#777;">Capítulo não encontrado</p>';
+    return;
+  }
+
+  let html = `<h2 class="titulo">${nome} ${cap}</h2>`;
+
+  capituloObj.versiculos.forEach(v => {
+    html += `
+      <p class="versiculo" data-texto="${v.texto}">
+        <span class="versiculo-num">${v.versiculo}</span>
+        ${v.texto}
+      </p>`;
+  });
+
+  conteudo.innerHTML = html;
+
+  document.title = `${nome} ${cap} - Bíblia Ave Maria`;
+
+  atualizarBotoesNavegacao();
+  atualizarBotaoFavorito();
+  destacarBusca();
+}
+
+function navegarCapitulo(delta) {
+  const capSelect = document.getElementById("capituloSelect");
+  let novoCap = capituloAtual + delta;
+
+  if (novoCap < 1) return;
+  
+  const livroObj = livrosFlat.find(l => l.nome === livroAtual);
+  const maxCap = Math.max(...livroObj.capitulos.map(c => c.capitulo));
+
+  if (novoCap > maxCap) return;
+
+  capSelect.value = novoCap;
+  carregarCapitulo();
+}
+
+function atualizarBotoesNavegacao() {
+  const livroObj = livrosFlat.find(l => l.nome === livroAtual);
+  if (!livroObj) return;
+
+  const caps = livroObj.capitulos.map(c => c.capitulo).sort((a,b)=>a-b);
+  const idxAtual = caps.indexOf(capituloAtual);
+
+  document.getElementById("btnAnterior").disabled = idxAtual <= 0;
+  document.getElementById("btnProximo").disabled = idxAtual >= caps.length - 1;
+}
+
+function destacarBusca() {
+  const termo = document.getElementById("searchInput").value.trim().toLowerCase();
+  if (!termo) {
+    document.querySelectorAll(".versiculo").forEach(v => {
+      if (v.dataset.textoOriginal) v.innerHTML = v.dataset.textoOriginal;
+    });
+    return;
+  }
+
+  document.querySelectorAll(".versiculo").forEach(v => {
+    if (!v.dataset.textoOriginal) {
+      v.dataset.textoOriginal = v.innerHTML;
+    }
+
+    let texto = v.dataset.textoOriginal;
+    const regex = new RegExp(`(${termo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, "gi");
+    texto = texto.replace(regex, '<span class="highlight">$1</span>');
+    v.innerHTML = texto;
+  });
+}
+
+// Favoritos
+function getFavoritos() {
+  return JSON.parse(localStorage.getItem("bibliaFavoritos") || "[]");
+}
+
+function salvarFavoritos(favs) {
+  localStorage.setItem("bibliaFavoritos", JSON.stringify(favs));
+}
+
+function isFavorito(nome, cap) {
+  const favs = getFavoritos();
+  return favs.some(f => f.livro === nome && f.cap === cap);
+}
+
+function toggleFavorito() {
+  const favs = getFavoritos();
+  const idx = favs.findIndex(f => f.livro === livroAtual && f.cap === capituloAtual);
+
+  if (idx >= 0) {
+    favs.splice(idx, 1);
+  } else {
+    favs.push({livro: livroAtual, cap: capituloAtual});
+  }
+
+  salvarFavoritos(favs);
+  atualizarBotaoFavorito();
+  carregarFavoritos();
+}
+
+function atualizarBotaoFavorito() {
+  const btn = document.getElementById("btnFavoritar");
+  btn.disabled = !livroAtual || !capituloAtual;
+  btn.textContent = isFavorito(livroAtual, capituloAtual) ? "Remover ★" : "Favoritar ★";
+}
+
+function carregarFavoritos() {
+  const favs = getFavoritos();
+  const lista = document.getElementById("favoritosList");
+  lista.innerHTML = "";
+
+  if (favs.length === 0) {
+    document.getElementById("favoritosSection").style.display = "none";
+    return;
+  }
+
+  document.getElementById("favoritosSection").style.display = "block";
+
+  favs.forEach((f, i) => {
+    const div = document.createElement("div");
+    div.className = "fav-item";
+    div.innerHTML = `
+      <span style="cursor:pointer;" onclick="irParaFavorito('${f.livro}', ${f.cap})">
+        ${f.livro} ${f.cap}
+      </span>
+      <button onclick="removerFavorito(${i})" style="background:#a33;color:white;font-size:0.9rem;padding:4px 8px;">×</button>
+    `;
+    lista.appendChild(div);
+  });
+}
+
+function irParaFavorito(livro, cap) {
+  document.getElementById("livroSelect").value = livro;
+  atualizarCapitulos();
+  setTimeout(() => {
+    document.getElementById("capituloSelect").value = cap;
+    carregarCapitulo();
+  }, 100);
+}
+
+function removerFavorito(index) {
+  const favs = getFavoritos();
+  favs.splice(index, 1);
+  salvarFavoritos(favs);
+  carregarFavoritos();
+}
+</script>
+</body>
+</html>
